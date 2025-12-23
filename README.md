@@ -59,7 +59,7 @@ The frontend communicates with this backend via REST APIs.
 
 ---
 
-## 📂 Dataset Information
+## 📂 Dataset and Model Information
 
 The project uses **multiple Kaggle datasets** merged and cleaned carefully.
 
@@ -73,6 +73,9 @@ The project uses **multiple Kaggle datasets** merged and cleaned carefully.
 - Unified class names across datasets
 - Balanced classes where possible
 - Split into **Train / Validation / Test**
+
+### Model Files
+Trained model files (`.keras`, `.h5`) are ignored via `.gitignore` and stored externally.
 
 ---
 

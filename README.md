@@ -84,6 +84,8 @@ Trained model files (`.keras`, `.h5`) are ignored via `.gitignore` and stored ex
 ```
 SKIN_DISEASE/
 │
+├── nootbooks/                    #colab notebooks that are used to train the model
+|
 ├── sample_images/                # Sample images for testing predictions
 │
 ├── skin_disease/                 # Django project root
@@ -133,6 +135,69 @@ SKIN_DISEASE/
 - 📊 Explainable AI (Grad-CAM)
 
 ---
+
+## ⚙️ Installation & Setup
+
+Follow the steps below to run the backend locally.
+
+---
+
+### ✅ Prerequisites
+
+- Python 3.9+
+- pip
+- Git
+
+1. Check versions:
+```bash
+python --version
+pip --version
+```
+
+2. Clone the repository:
+```bash
+https://github.com/Onkar2104/skin_disease
+```
+
+3. Navigate to the project folder:
+
+```bash
+cd skin_disease
+```
+
+4. Set up a virtual environment (optional but recommended):
+```bash
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate  
+```
+
+5. Install dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+6. Apply migrations:
+```bash
+python manage.py migrate
+```
+
+7. Create a superuser to access the admin panel:
+```bash
+python manage.py createsuperuser
+```
+
+8. Run the development server:
+```bash
+python manage.py runserver 0.0.0.0:8000
+```
+
+9. Access the app in your browser at:
+```bash
+http://127.0.0.1:8000
+```
+
+---
+
 
 ## ⚠️ Disclaimer
 

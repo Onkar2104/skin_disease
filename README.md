@@ -156,7 +156,7 @@ pip --version
 
 2. Clone the repository:
 ```bash
-https://github.com/Onkar2104/skin_disease
+git clone https://github.com/Onkar2104/skin_disease
 ```
 
 3. Navigate to the project folder:

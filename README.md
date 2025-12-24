@@ -156,7 +156,7 @@ pip --version
 
 2. Clone the repository:
 ```bash
-https://github.com/Onkar2104/skin_disease
+git clone https://github.com/Onkar2104/skin_disease
 ```
 
 3. Navigate to the project folder:
@@ -207,6 +207,6 @@ It **does not replace professional medical diagnosis**. Always consult a certifi
 
 ## 👨‍💻 Author
 
-**Onkar Ijare**  
+[Onkar Ijare](https://github.com/Onkar2104), [Shivangi Gupta](https://github.com/shivangi-guptaa), [Akansha](https://github.com/akkkiee), [Radhika Sharma](https://github.com/Radhikasharma-debug), [Krishna Shrivastav](https://github.com/7TB-KRISHNA) 
 
 ---

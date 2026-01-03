@@ -72,17 +72,12 @@ class User(AbstractBaseUser, PermissionsMixin):
 
 class RegisterOTP(models.Model):
     email = models.EmailField(unique=True)
-
     otp_hash = models.CharField(max_length=128)
-
-    full_name = models.CharField(max_length=50, blank=True, null=True)
-    password_hash = models.CharField(max_length=128, blank=True, null=True)
-    age = models.PositiveIntegerField(default=1,blank=True, null=True)
-    gender = models.CharField(max_length=10, blank=True, null=True)
-    skin_type = models.CharField(max_length=20, blank=True, null=True)
 
     resend_count = models.IntegerField(default=0)
     attempts = models.IntegerField(default=0)
+
+    is_verified = models.BooleanField(default=False)
 
     created_at = models.DateTimeField(auto_now_add=True)
     last_sent_at = models.DateTimeField(auto_now=True)

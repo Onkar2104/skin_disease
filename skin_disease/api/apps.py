@@ -19,4 +19,4 @@ class ApiConfig(AppConfig):
         )
 
         ml_state.model = tf.keras.models.load_model(model_path)
-        print("✅ Skin disease model loaded successfully")
+        # print("✅ Skin disease model loaded successfully")

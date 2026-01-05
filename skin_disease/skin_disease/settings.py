@@ -142,13 +142,11 @@ CORS_ALLOW_HEADERS = [
 from datetime import timedelta
 
 REST_FRAMEWORK = {
-    "DEFAULT_PERMISSION_CLASSES": [
-        "rest_framework.permissions.AllowAny",
-    ],
-    "DEFAULT_AUTHENTICATION_CLASSES": [
+    "DEFAULT_AUTHENTICATION_CLASSES": (
         "rest_framework_simplejwt.authentication.JWTAuthentication",
-    ],
+    ),
 }
+
 
 
 SIMPLE_JWT = {
@@ -166,3 +164,7 @@ EMAIL_PORT = 587
 EMAIL_HOST_USER = 'ijareonkar2184@gmail.com'
 EMAIL_HOST_PASSWORD = 'qsmp tjew yrqb eqcx'
 DEFAULT_FROM_EMAIL = EMAIL_HOST_USER
+
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"

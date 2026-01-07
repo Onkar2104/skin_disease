@@ -1,126 +1,220 @@
-import json
 import random
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from django.core.mail import send_mail
 from django.conf import settings
-from django.utils import timezone
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework.decorators import api_view, permission_classes
 
 from .serializers import *
-from .models import User, RegisterOTP
+from .models import User, VerificationOTP
 
 
-# ---------------- SEND OTP ----------------
-@csrf_exempt
-def send_register_otp(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST only"}, status=405)
 
-    email = request.POST.get("email", "").lower().strip()
+@api_view(["GET"])
+@permission_classes([IsAuthenticated])
+def get_profile(request):
+    user = request.user
+    return Response({
+        "id": user.id,
+        "email": user.email,
+        "full_name": user.full_name,
+        "phone": user.phone,
+        "email_verified": user.email_verified,
+        "phone_verified": user.phone_verified,
+        "gender": user.gender,
+        "blood_group": user.blood_group,
+        "skin_type": user.skin_type,
+    })
 
-    if not email:
-        return JsonResponse({"error": "Email required"}, status=400)
 
-    if User.objects.filter(email=email).exists():
-        return JsonResponse({"error": "Email already in use"}, status=409)
+@api_view(["PATCH"])
+@permission_classes([IsAuthenticated])
+def update_profile(request):
+    user = request.user
+    data = request.data
 
+    editable_fields = [
+        "full_name", "phone", "dob", "age", "gender", "skin_type",
+        "blood_group", "whatsapp_number", "emergency_contact",
+        "area", "city", "taluka", "district", "state",
+        "country", "pincode", "insurance_name", "insurance_number"
+    ]
+
+    for field in editable_fields:
+        if field in data:
+            setattr(user, field, data.get(field))
+
+    # Reset verification if changed
+    if "email" in data and data["email"] != user.email:
+        user.email = data["email"]
+        user.email_verified = False
+
+    if "phone" in data and data["phone"] != user.phone:
+        user.phone_verified = False
+
+    if "profile_photo" in request.FILES:
+        user.profile_photo = request.FILES["profile_photo"]
+
+    user.save()
+    return Response({"message": "Profile updated successfully"})
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def send_email_otp(request):
+    email = request.user.email
     otp = str(random.randint(100000, 999999))
 
-    obj, _ = RegisterOTP.objects.get_or_create(email=email)
-
-    if obj.can_reset_resend():
-        obj.resend_count = 0
-
-    if obj.resend_count >= 3:
-        return JsonResponse({"error": "OTP resend limit reached"}, status=429)
-
+    obj, _ = VerificationOTP.objects.get_or_create(
+        identifier=email,
+        purpose="email"
+    )
     obj.set_otp(otp)
-    obj.resend_count += 1
-    obj.created_at = timezone.now()
-    obj.is_verified = False
     obj.save()
 
     send_mail(
-        "Your Verification Code",
-        f"Your OTP is {otp}",
+        "Email Verification OTP",
+        f"Your OTP is {otp}. Valid for 5 minutes.",
         settings.EMAIL_HOST_USER,
         [email],
     )
 
-    return JsonResponse({"message": "OTP sent"})
+    return Response({"message": "Email OTP sent"})
 
 
-# ---------------- VERIFY OTP (NO USER CREATION) ----------------
-@csrf_exempt
-def verify_register_otp(request):
-    if request.method != "POST":
-        return JsonResponse({"error": "POST only"}, status=405)
 
-    email = request.POST.get("email", "").lower().strip()
-    otp = request.POST.get("otp", "")
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def verify_email_otp(request):
+    otp = request.data.get("otp")
+    email = request.user.email
 
     try:
-        obj = RegisterOTP.objects.get(email=email)
-    except RegisterOTP.DoesNotExist:
-        return JsonResponse({"error": "Invalid OTP"}, status=400)
+        obj = VerificationOTP.objects.get(
+            identifier=email,
+            purpose="email"
+        )
+    except VerificationOTP.DoesNotExist:
+        return Response(
+            {"error": "OTP not found. Please request OTP first."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     if obj.is_expired():
         obj.delete()
-        return JsonResponse({"error": "OTP expired"}, status=400)
+        return Response(
+            {"error": "OTP expired. Please resend OTP."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     if not obj.check_otp(otp):
-        obj.attempts += 1
-        obj.save()
-        return JsonResponse({"error": "Invalid OTP"}, status=400)
+        return Response(
+            {"error": "Invalid OTP"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    # ✅ MARK VERIFIED ONLY
-    obj.is_verified = True
+    request.user.email_verified = True
+    request.user.save()
+    obj.delete()
+
+    return Response({"message": "Email verified successfully"})
+
+
+
+
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def send_phone_otp(request):
+    phone = request.user.phone
+
+    # ✅ FIX: guard clause
+    if not phone:
+        return Response(
+            {"error": "Please add phone number before verification"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
+
+    otp = str(random.randint(100000, 999999))
+
+    obj, _ = VerificationOTP.objects.get_or_create(
+        identifier=phone,
+        purpose="phone"
+    )
+    obj.set_otp(otp)
     obj.save()
 
-    return JsonResponse({"message": "OTP verified successfully"})
+    print("PHONE OTP:", otp)
+
+    return Response({"message": "Phone OTP sent"})
 
 
-# ---------------- FINAL REGISTER ----------------
-@csrf_exempt
-def register_user(request):
 
-    if request.method != "POST":
-        return JsonResponse({"error": "POST only"}, status=405)
+@api_view(["POST"])
+@permission_classes([IsAuthenticated])
+def verify_phone_otp(request):
+    otp = request.data.get("otp")
+    phone = request.user.phone
+
+    if not phone:
+        return Response(
+            {"error": "Phone number not set"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
     try:
-        data = json.loads(request.body.decode("utf-8"))
-    except Exception as e:
-        return JsonResponse({"error": "Invalid JSON"}, status=400)
+        obj = VerificationOTP.objects.get(
+            identifier=phone,
+            purpose="phone"
+        )
+    except VerificationOTP.DoesNotExist:
+        return Response(
+            {"error": "OTP not found. Please request OTP first."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    email = data.get("email", "").lower().strip()
+    if obj.is_expired():
+        obj.delete()
+        return Response(
+            {"error": "OTP expired. Please resend OTP."},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    try:
-        otp_obj = RegisterOTP.objects.get(email=email, is_verified=True)
-    except RegisterOTP.DoesNotExist:
-        return JsonResponse({"error": "Email not verified"}, status=403)
+    if not obj.check_otp(otp):
+        return Response(
+            {"error": "Invalid OTP"},
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
-    if User.objects.filter(email=email).exists():
-        return JsonResponse({"error": "User already exists"}, status=409)
+    request.user.phone_verified = True
+    request.user.save()
+    obj.delete()
 
-    user = User.objects.create_user(
-        email=email,
-        password=data.get("password"),
-        full_name=data.get("full_name", ""),
-        age=data.get("age"),
-        gender=data.get("gender", ""),
-        skin_type=data.get("skin_type", ""),
-    )
+    return Response({"message": "Phone verified successfully"})
 
-    otp_obj.delete()
 
-    return JsonResponse({"message": "Account created"})
 
+
+class RegisterAPIView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = RegisterSerializer(data=request.data)
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Account created successfully"},
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(
+            serializer.errors,
+            status=status.HTTP_400_BAD_REQUEST
+        )
 
 class LoginView(APIView):
     permission_classes = [AllowAny]

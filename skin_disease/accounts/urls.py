@@ -7,10 +7,18 @@ from .views import *
 
 
 urlpatterns = [
-    path("register/send-otp/", send_register_otp),
-    path("register/verify-otp/", verify_register_otp),
-    path("register/", register_user),
-    path("login/", LoginView.as_view(), name="login"),
-    path("logout/", LogoutAPIView.as_view(), name="logout"),
+    path("register/", RegisterAPIView.as_view()),
+    path("login/", LoginView.as_view()),
+    path("logout/", LogoutAPIView.as_view()),
+
+    path("profile/update/", update_profile),
+    path("profile/", get_profile),
+
+    path("otp/email/send/", send_email_otp),
+    path("otp/email/verify/", verify_email_otp),
+
+    path("otp/phone/send/", send_phone_otp),
+    path("otp/phone/verify/", verify_phone_otp),
 ]
+
 

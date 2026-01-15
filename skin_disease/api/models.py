@@ -17,3 +17,17 @@ class Scan(models.Model):
 
     def __str__(self):
         return f"{self.user.email} - {self.diagnosis}"
+    
+
+#Hospital Feedback Model
+class DoctorFeedback(models.Model):
+    doctor_name = models.CharField(max_length=255)
+    hospital_name = models.CharField(max_length=255)
+    disease = models.CharField(max_length=255)
+    severity = models.CharField(max_length=20)
+
+    rating = models.IntegerField()  # 1–5
+    successful = models.BooleanField()
+
+    created_at = models.DateTimeField(auto_now_add=True)
+

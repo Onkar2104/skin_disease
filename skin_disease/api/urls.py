@@ -4,6 +4,7 @@ from .views import (
     predict_skin_disease,
     ScanViewSet,
     download_scan_pdf,
+    nearby_hospitals,
 )
 
 router = DefaultRouter()
@@ -17,4 +18,7 @@ urlpatterns = [
 
     # Optional
     path("scans/<int:pk>/pdf/", download_scan_pdf),
+
+    path("nearby-hospitals/", nearby_hospitals),
+
 ]

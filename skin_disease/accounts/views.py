@@ -7,7 +7,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework.decorators import api_view, permission_classes
+from rest_framework_simplejwt.authentication import JWTAuthentication
+from rest_framework.decorators import api_view, permission_classes, authentication_classes
 
 from .serializers import *
 from .models import User, VerificationOTP
@@ -15,6 +16,7 @@ from .models import User, VerificationOTP
 
 
 @api_view(["GET"])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def get_profile(request):
     user = request.user
@@ -32,6 +34,7 @@ def get_profile(request):
 
 
 @api_view(["PATCH"])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def update_profile(request):
     user = request.user
@@ -63,7 +66,8 @@ def update_profile(request):
     return Response({"message": "Profile updated successfully"})
 
 
-@api_view(["POST"])
+@api_view(["PATCH"])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def send_email_otp(request):
     email = request.user.email
@@ -87,7 +91,8 @@ def send_email_otp(request):
 
 
 
-@api_view(["POST"])
+@api_view(["PATCH"])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def verify_email_otp(request):
     otp = request.data.get("otp")
@@ -126,7 +131,8 @@ def verify_email_otp(request):
 
 
 
-@api_view(["POST"])
+@api_view(["PATCH"])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def send_phone_otp(request):
     phone = request.user.phone
@@ -153,7 +159,8 @@ def send_phone_otp(request):
 
 
 
-@api_view(["POST"])
+@api_view(["PATCH"])
+@authentication_classes([JWTAuthentication])
 @permission_classes([IsAuthenticated])
 def verify_phone_otp(request):
     otp = request.data.get("otp")

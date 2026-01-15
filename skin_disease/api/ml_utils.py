@@ -51,12 +51,6 @@ def predict_skin_disease_from_file(model, file_obj):
     full_form = CLASS_FULL_FORMS[label_code]
     confidence = float(preds[idx])
 
-    # print("predicted_label:", label_code,
-    #     "predicted_disease:", full_form,
-    #     "confidence:", confidence,
-    #     "confidence_percent:", round(confidence * 100, 2),
-    #     "explanation:", f"The model predicts {full_form} with {confidence*100:.2f}% confidence.")
-
     return {
         "predicted_label": label_code,
         "predicted_disease": full_form,

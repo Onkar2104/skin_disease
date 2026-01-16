@@ -18,7 +18,7 @@ import os
 load_dotenv()
 
 GOOGLE_MAPS_API_KEY = os.getenv("GOOGLE_MAPS_API_KEY")
-
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -41,6 +41,7 @@ ALLOWED_HOSTS = ["*"]
 INSTALLED_APPS = [
     'api',
     'accounts',
+    'chatbot',
 
     'django.contrib.admin',
     'django.contrib.auth',

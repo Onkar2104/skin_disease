@@ -207,6 +207,6 @@ It **does not replace professional medical diagnosis**. Always consult a certifi
 
 ## 👨‍💻 Author
 
-[Onkar Ijare](https://github.com/Onkar2104), [Shivangi Gupta](https://github.com/shivangi-guptaa), [Akansha Bhadauria](https://github.com/akkkiee), [Radhika Sharma](https://github.com/Radhikasharma-debug), [Krishna Shrivastav](https://github.com/7TB-KRISHNA) 
+[Onkar Ijare](https://github.com/Onkar2104)
 
 ---
